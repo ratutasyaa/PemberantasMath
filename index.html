@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptic Quest: Operasi Siber</title>
+    <style>
+        :root {
+            --neon-green: #33ff33;
+            --neon-glow: rgba(51, 255, 51, 0.3);
+            --dark-bg: #0a0a0a;
+            --panel-bg: #111111;
+            --neon-red: #ff3333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        header {
+            text-align: center;
+            border: 2px solid var(--neon-green);
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px var(--neon-glow);
+            text-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .game-grid {
+                grid-template-columns: 1fr 1.5fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 2px solid var(--neon-green);
+            padding: 20px;
+            box-shadow: 0 0 10px var(--neon-glow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel h3 {
+            border-bottom: 1px dashed var(--neon-green);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .story-text {
+            line-height: 1.6;
+            white-space: pre-line;
+            font-size: 14px;
+        }
+
+        .puzzle-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            min-height: 250px;
+        }
+
+        /* Komponen Teka-Teki */
+        .code-display {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            border: 1px dashed var(--neon-green);
+            padding: 15px 30px;
+            margin: 20px 0;
+            background: #000;
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 10px 20px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .btn-toggle {
+            width: 120px;
+            margin: 5px;
+        }
+
+        .btn-toggle.active {
+            background-color: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        input[type="number"] {
+            background-color: #000;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            font-family: inherit;
+            font-size: 24px;
+            padding: 5px 10px;
+            width: 120px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Logic Visualizer */
+        .logic-gate-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .inventory-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .inventory-list li {
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .hint-box {
+            border: 1px dotted var(--neon-green);
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            display: none;
+            background-color: #000;
+            line-height: 1.4;
+        }
+
+        footer {
+            border: 2px solid var(--neon-green);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000;
+            font-size: 13px;
+        }
+
+        .status-error {
+            color: var(--neon-red);
+            text-shadow: 0 0 5px var(--neon-red);
+        }
+
+        .status-success {
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>[CRYPTIC QUEST: OPERASI SIBER]</h1>
+        <div id="level-title" style="margin-top: 5px; font-weight: bold;">LEVEL 1: DEKRIPSI MAINFRAME</div>
+    </header>
+
+    <div class="game-grid">
+        <!-- PANEL KIRI: NARASI -->
+        <div class="panel">
+            <h3>Log Misi</h3>
+            <div id="story" class="story-text">
+                Memuat data cerita...
+            </div>
+        </div>
+
+        <!-- PANEL TENGAH: PUZZLE -->
+        <div class="panel">
+            <h3>Panel Interaktif</h3>
+            <div id="puzzle-wrapper" class="puzzle-area">
+                <!-- Elemen dinamis akan dirender oleh JavaScript di sini -->
+            </div>
+        </div>
+
+        <!-- PANEL KANAN: UTILITY -->
+        <div class="panel">
+            <h3>Data Agen</h3>
+            <div>
+                <p style="font-weight: bold; margin-bottom: 5px;">Kantong Barang (Inventory):</p>
+                <ul id="inventory" class="inventory-list">
+                    <li>[ ] Kosong</li>
+                </ul>
+            </div>
+            <div style="margin-top: auto; border-top: 1px dashed var(--neon-green); padding-top: 15px;">
+                <button class="btn" id="btn-hint" style="width: 100%;">Minta Petunjuk</button>
+                <div id="hint-display" class="hint-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div id="system-log">SISTEM: Menunggu dekripsi agen...</div>
+        <button class="btn hidden" id="btn-next">Lanjut ke Level Berikutnya >></button>
+    </footer>
+
+    <script>
+        // Data Struktur Level Game
+        const levels = [
+            {
+                id: 1,
+                title: "LEVEL 1: DEKRIPSI MAINFRAME",
+                story: "Anda berhasil menyusup ke ruang server utama. Sebuah komputer mainframe tua meminta sandi otentikasi.\n\nDi atas meja, Anda menemukan catatan buram: \n'Kunci pintu ini adalah teks di layar jika digeser MUNDUR beberapa langkah secara alfabet (Caesar Cipher). Rumus dasarnya adalah Aritmatika Modular.'",
+                puzzleType: "caesar",
+                encryptedText: "KDOZ",
+                hint: "Rumus Caesar Cipher Mundur: (Posisi Huruf - N) % 26. Jika teksnya KDOZ dan petunjuk di catatan mengindikasikan pergeseran angka ganjil sebelum angka lima, cobalah hitung mundur sebanyak 3 langkah.",
+                items: ["[v] Kertas Catatan Kuno"]
+            },
+            {
+                id: 2,
+                title: "LEVEL 2: REPARASI GERBANG LOGIKA",
+                story: "Komputer terbuka, namun jalur lift darurat menuju ruang dokumen terkunci! Sistem kelistrikan magnetik pintu rusak.\n\nAnda harus merekayasa ulang Aljabar Boolean pada sistem saklar agar output bernilai TRUE (1) untuk mengalirkan listrik.",
+                puzzleType: "boolean",
+                hint: "Hukum Gerbang AND: Output hanya akan menghasilkan nilai TRUE (1) jika dan hanya jika KEDUA input (Saklar A DAN Saklar B) bernilai TRUE (1). Klik saklar untuk mengubah nilainya.",
+                items: ["[v] Kertas Catatan Kuno", "[v] Obeng Saku Detektif"]
+            },
+            {
+                id: 3,
+                title: "LEVEL 3: PIN BRANKAS MATEMATIKA",
+                story: "Anda berada di depan brankas rahasia. Brankas ini tidak menggunakan sandi kata, melainkan membutuhkan angka terakhir dari sebuah barisan logika.\n\nLayar brankas berkedip menampilkan kode pola: 1, 1, 2, 3, 5, 8, ...\n\nPecahkan Teori Bilangan ini untuk membuka dokumen konspirasi!",
+                puzzleType: "fibonacci",
+                correctAnswer: 13,
+                hint: "Ini adalah Deret Fibonacci. Pola matematikanya didapat dengan menjumlahkan dua bilangan sebelumnya untuk mendapatkan bilangan berikutnya. \nContoh: 1+1=2, 1+2=3, 2+3=5, 3+5=8. Berapa angka selanjutnya?",
+                items: ["[v] Kertas Catatan Kuno", "[v] Obeng Saku Detektif", "[v] Kunci Enkripsi Dokumen"]
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        let caesarShift = 0;
+        let switchA = false;
+        let switchB = false;
+
+        // Elemen DOM
+        const levelTitleEl = document.getElementById('level-title');
+        const storyEl = document.getElementById('story');
+        const puzzleWrapper = document.getElementById('puzzle-wrapper');
+        const inventoryEl = document.getElementById('inventory');
+        const btnHint = document.getElementById('btn-hint');
+        const hintDisplay = document.getElementById('hint-display');
+        const systemLogEl = document.getElementById('system-log');
+        const btnNext = document.getElementById('btn-next');
+
+        // Inisialisasi Game
+        function initGame() {
+            loadLevel(currentLevelIndex);
